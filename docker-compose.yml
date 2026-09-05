@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  stalwart:
+    image: stalwartlabs/mail-server:latest
+    restart: unless-stopped
+    ports:
+      - "25:25"
+      - "465:465"
+      - "587:587"
+      - "143:143"
+      - "993:993"
+      - "80:80"
+      - "443:443"
+      - "4190:4190"
+    volumes:
+      - stalwart-data:/opt/stalwart/data
+    environment:
+      - STALWART_ADMIN_EMAIL=postmaster@mg.cargoffer.com
+      - STALWART_ADMIN_PASSWORD=ChangeMeAdminPass123!Strong
+      - STALWART_HOSTNAME=mail.mg.cargoffer.com
+      - STALWART_TLS_TYPE=letsencrypt
+      - STALWART_TLS_CERT=/certs/fullchain.pem
+      - STALWART_TLS_KEY=/certs/privkey.pem
+    networks:
+      - mail
+
+networks:
+  mail:
+    driver: bridge
+
+volumes:
+  stalwart-data:
