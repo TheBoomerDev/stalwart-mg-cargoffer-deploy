@@ -10,8 +10,9 @@ services:
       - "587:587"
       - "993:993"
       - "995:995"
-      - "8080:8080"
       - "4190:4190"
+    expose:
+      - "8080"
     volumes:
       - stalwart-etc:/etc/stalwart
       - stalwart-data:/var/lib/stalwart
