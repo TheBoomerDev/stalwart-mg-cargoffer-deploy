@@ -1,6 +1,8 @@
 services:
-  stalwart:
-    image: stalwartlabs/stalwart:latest
+  mailserver:
+    image: ghcr.io/docker-mailserver/docker-mailserver:latest
+    container_name: dms-mail
+    hostname: mail.m.cargoffer.com
     restart: unless-stopped
     ports:
       - "25:25"
@@ -14,9 +16,33 @@ services:
     expose:
       - "8080"
     volumes:
-      - stalwart-etc:/etc/stalwart
-      - stalwart-data:/var/lib/stalwart
+      - /opt/mailu/mail-data:/var/mail
+      - /opt/mailu/mail-state:/var/mail-state
+      - /opt/mailu/mail-logs:/var/log/mail
+      - /opt/mailu/config:/tmp/docker-mailserver
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - ENABLE_RSPAMD=0
+      - ENABLE_CLAMAV=0
+      - ENABLE_FAIL2BAN=1
+      - ENABLE_POSTGREY=0
+      - SSL_TYPE=manual
+      - SSL_CERT_PATH=/tmp/docker-mailserver/ssl/fullchain.pem
+      - SSL_KEY_PATH=/tmp/docker-mailserver/ssl/privkey.pem
+      - PERMIT_DOCKER=none
+      - ONE_DIR=1
+      - SPOOF_PROTECTION=1
+      - ENABLE_POP3=1
+      - SMTP_ONLY=0
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mailu-front.rule=Host(`mail.m.cargoffer.com`)
+      - traefik.http.routers.mailu-front.entryPoints=https
+      - traefik.http.routers.mailu-front.tls.certresolver=letsencrypt
+      - traefik.http.services.mailu-front.loadbalancer.server.port=8080
+    networks:
+      - jhv4mlu5xo3fbhtinziuuggf
 
-volumes:
-  stalwart-etc:
-  stalwart-data:
+networks:
+  jhv4mlu5xo3fbhtinziuuggf:
+    external: true
